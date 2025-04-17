@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
-import { ArrowRight, CheckCircle, Users, Building, BarChart4, Clock } from 'lucide-react';
+import { ArrowRight, CheckCircle, Users, Building, BarChart4, Clock, ChevronDown } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -56,6 +56,9 @@ const Index = () => {
                 <span className="status-badge status-pending">Pending</span>
               </div>
               <p className="text-sm text-gray-300">Urgent water supply needed in Sector 5</p>
+              <div className="flex justify-end mt-2">
+                <ChevronDown className="h-5 w-5 text-gray-400" />
+              </div>
             </div>
             
             <div className="request-card">
@@ -64,6 +67,9 @@ const Index = () => {
                 <span className="status-badge status-completed">Completed</span>
               </div>
               <p className="text-sm text-gray-300">Street light maintenance in Ward 7</p>
+              <div className="flex justify-end mt-2">
+                <ChevronDown className="h-5 w-5 text-gray-400" />
+              </div>
             </div>
             
             <div className="request-card">
@@ -72,6 +78,9 @@ const Index = () => {
                 <span className="status-badge status-inprogress">In Progress</span>
               </div>
               <p className="text-sm text-gray-300">Vaccination drive at community center</p>
+              <div className="flex justify-end mt-2">
+                <ChevronDown className="h-5 w-5 text-gray-400" />
+              </div>
             </div>
           </div>
         </div>
