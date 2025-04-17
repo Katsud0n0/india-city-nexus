@@ -4,6 +4,7 @@ import { Plus, Filter, UserPlus, Mail, Phone, Building, MapPin, X } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -22,8 +23,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import TeamMemberProfile from '@/components/TeamMemberProfile';
 
-// Updated team members with profile images
+// Updated team members with default profile image
 const mockTeamMembers = [
   {
     id: 1,
@@ -33,7 +35,7 @@ const mockTeamMembers = [
     email: 'rajesh.kumar@jdmodern.gov.in',
     phone: '+91 98765 43210',
     location: 'HQ, Sector 5',
-    avatar: '/lovable-uploads/24053dc8-dd48-4c5f-87d8-096d82f3c28f.png'
+    avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
   },
   {
     id: 2,
@@ -43,7 +45,7 @@ const mockTeamMembers = [
     email: 'priya.sharma@jdmodern.gov.in',
     phone: '+91 87654 32109',
     location: 'East Zone Office',
-    avatar: 'https://randomuser.me/api/portraits/women/12.jpg'
+    avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
   },
   {
     id: 3,
@@ -53,7 +55,7 @@ const mockTeamMembers = [
     email: 'amit.patel@jdmodern.gov.in',
     phone: '+91 76543 21098',
     location: 'Medical Complex, Ward 7',
-    avatar: 'https://randomuser.me/api/portraits/men/22.jpg'
+    avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
   },
   {
     id: 4,
@@ -63,7 +65,7 @@ const mockTeamMembers = [
     email: 'sunita.verma@jdmodern.gov.in',
     phone: '+91 65432 10987',
     location: 'West Zone Office',
-    avatar: 'https://randomuser.me/api/portraits/women/32.jpg'
+    avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
   },
   {
     id: 5,
@@ -73,7 +75,7 @@ const mockTeamMembers = [
     email: 'vikram.singh@jdmodern.gov.in',
     phone: '+91 54321 09876',
     location: 'Central Office',
-    avatar: 'https://randomuser.me/api/portraits/men/42.jpg'
+    avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
   },
   {
     id: 6,
@@ -83,7 +85,7 @@ const mockTeamMembers = [
     email: 'meera.joshi@jdmodern.gov.in',
     phone: '+91 43210 98765',
     location: 'Green Zone, Sector 8',
-    avatar: 'https://randomuser.me/api/portraits/women/52.jpg'
+    avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
   },
 ];
 
@@ -95,6 +97,8 @@ const Team = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [teamMembers, setTeamMembers] = useState(mockTeamMembers);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<typeof mockTeamMembers[0] | null>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [newTeamMember, setNewTeamMember] = useState({
     name: '',
     email: '',
@@ -119,6 +123,11 @@ const Team = () => {
 
   const handleDepartmentChange = (value: string) => {
     setNewTeamMember(prev => ({ ...prev, department: value }));
+  };
+
+  const handleViewProfile = (member: typeof mockTeamMembers[0]) => {
+    setSelectedMember(member);
+    setIsProfileDialogOpen(true);
   };
 
   const handleInvite = () => {
@@ -150,7 +159,7 @@ const Team = () => {
     const newMember = {
       id: teamMembers.length + 1,
       ...newTeamMember,
-      avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'women' : 'men'}/${Math.floor(Math.random() * 99)}.jpg`
+      avatar: '/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png'
     };
     
     setTeamMembers(prev => [...prev, newMember]);
@@ -253,13 +262,10 @@ const Team = () => {
                   <CardContent className="p-0">
                     <div className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
-                          <img
-                            src={member.avatar}
-                            alt={member.name}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage src={member.avatar} alt={member.name} />
+                          <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
                         <div>
                           <h3 className="font-semibold text-lg">{member.name}</h3>
                           <p className="text-gray-500 text-sm">{member.role}</p>
@@ -287,7 +293,12 @@ const Team = () => {
                     </div>
                     
                     <div className="border-t border-gray-100 p-4 bg-gray-50 flex justify-end">
-                      <Button variant="outline" size="sm" className="text-xs">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => handleViewProfile(member)}
+                      >
                         View Profile
                       </Button>
                     </div>
@@ -315,13 +326,10 @@ const Team = () => {
                     <tr key={member.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 mr-3">
-                            <img
-                              src={member.avatar}
-                              alt={member.name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
+                          <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={member.avatar} alt={member.name} />
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
                           <span className="font-medium">{member.name}</span>
                         </div>
                       </td>
@@ -330,7 +338,13 @@ const Team = () => {
                       <td className="py-3 px-4 text-gray-500">{member.email}</td>
                       <td className="py-3 px-4 text-gray-500">{member.location}</td>
                       <td className="py-3 px-4 text-right">
-                        <Button variant="ghost" size="sm">View</Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewProfile(member)}
+                        >
+                          View
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -452,6 +466,13 @@ const Team = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Team Member Profile Dialog */}
+      <TeamMemberProfile
+        member={selectedMember}
+        isOpen={isProfileDialogOpen}
+        onClose={() => setIsProfileDialogOpen(false)}
+      />
     </div>
   );
 };

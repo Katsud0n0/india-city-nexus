@@ -12,20 +12,21 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-jd-darker">
       <Navbar />
       
-      <div className="flex-1 flex flex-col md:flex-row">
-        <div className="flex-1 flex flex-col justify-center px-12 md:px-24 py-12">
-          <h1 className="text-6xl font-bold text-white mb-4">
+      <div className="flex-1 flex flex-col">
+        {/* Hero Section with centered content */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12">
+          <h1 className="text-7xl font-bold text-white mb-6 animate-fade-in">
             <span>JD</span>
             <span className="text-jd-lavender"> Modern Solutions</span>
           </h1>
           
-          <p className="text-xl text-white mb-12 max-w-xl">
+          <p className="text-xl text-white mb-12 max-w-2xl mx-auto">
             A unified platform for interdepartmental cooperation and streamlined communication.
           </p>
           
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 justify-center">
             <Button 
-              className="bg-jd-lavender hover:bg-jd-purple text-white px-8 py-6 text-lg font-medium"
+              className="bg-jd-lavender hover:bg-jd-purple text-white px-8 py-6 text-lg font-medium hover-scale"
               onClick={() => navigate('/dashboard')}
             >
               Go to Dashboard
@@ -33,7 +34,7 @@ const Index = () => {
             
             <Button 
               variant="secondary" 
-              className="bg-white text-jd-darker hover:bg-gray-100 px-8 py-6 text-lg font-medium flex items-center"
+              className="bg-white text-jd-darker hover:bg-gray-100 px-8 py-6 text-lg font-medium flex items-center hover-scale"
               onClick={() => navigate('/departments')}
             >
               Explore Departments
@@ -48,7 +49,7 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 hover-scale">
               <div className="flex items-center mb-4">
                 <CheckCircle className="text-jd-lavender mr-3 h-6 w-6" />
                 <h3 className="text-xl font-semibold">Centralized Request Management</h3>
@@ -58,7 +59,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 hover-scale">
               <div className="flex items-center mb-4">
                 <Users className="text-jd-lavender mr-3 h-6 w-6" />
                 <h3 className="text-xl font-semibold">Interdepartmental Collaboration</h3>
@@ -68,7 +69,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 hover-scale">
               <div className="flex items-center mb-4">
                 <Clock className="text-jd-lavender mr-3 h-6 w-6" />
                 <h3 className="text-xl font-semibold">Real-time Status Updates</h3>
@@ -78,7 +79,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 hover-scale">
               <div className="flex items-center mb-4">
                 <Building className="text-jd-lavender mr-3 h-6 w-6" />
                 <h3 className="text-xl font-semibold">Multiple Department Access</h3>
@@ -88,7 +89,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 hover-scale">
               <div className="flex items-center mb-4">
                 <BarChart4 className="text-jd-lavender mr-3 h-6 w-6" />
                 <h3 className="text-xl font-semibold">Advanced Analytics</h3>
@@ -98,7 +99,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 hover-scale">
               <div className="flex items-center mb-4">
                 <CheckCircle className="text-jd-lavender mr-3 h-6 w-6" />
                 <h3 className="text-xl font-semibold">Transparent Workflow</h3>
@@ -111,7 +112,7 @@ const Index = () => {
           
           <div className="text-center">
             <Button 
-              className="bg-jd-lavender hover:bg-jd-purple text-white px-8 py-6 text-lg font-medium"
+              className="bg-jd-lavender hover:bg-jd-purple text-white px-8 py-6 text-lg font-medium hover-scale"
               onClick={() => navigate('/register')}
             >
               Get Started Today

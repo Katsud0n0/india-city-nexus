@@ -46,6 +46,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const foundUser = getUserByUsername(username);
     
     if (foundUser && foundUser.password === password) {
+      // Add default profile picture if the user doesn't have one
+      if (!foundUser.profilePicture) {
+        foundUser.profilePicture = "/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png";
+      }
+      
       setUser(foundUser);
       setIsAuthenticated(true);
       localStorage.setItem('current_user', JSON.stringify(foundUser));
@@ -80,7 +85,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return false;
     }
     
-    const newUser = createUser(userData);
+    // Add default profile picture for new users
+    const userWithDefaults = {
+      ...userData,
+      profilePicture: "/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png"
+    };
+    
+    const newUser = createUser(userWithDefaults);
     
     toast({
       title: "Registration Successful",

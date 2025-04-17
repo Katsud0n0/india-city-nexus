@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Save, User, Bell, Lock, Globe, Moon, Sun, Smartphone, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,10 +11,12 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Settings = () => {
   const { toast } = useToast();
   const { user, updateUserProfile } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [profileForm, setProfileForm] = useState({
     name: user?.fullName || 'Rajesh Kumar',
@@ -48,6 +50,9 @@ const Settings = () => {
   });
   
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(
+    user?.profilePicture || "/lovable-uploads/6cf1950e-60fb-4d9b-a5ea-d7ca88ae0d31.png"
+  );
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfileForm({
@@ -63,13 +68,38 @@ const Settings = () => {
     });
   };
 
+  const handleProfilePhotoClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result && typeof e.target.result === 'string') {
+          setProfilePicture(e.target.result);
+          
+          toast({
+            title: "Photo Updated",
+            description: "Your profile photo has been changed.",
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveProfile = () => {
     // In a real app, this would update the user's profile in the backend
     if (user) {
       updateUserProfile({
         ...user,
         fullName: profileForm.name,
-        department: profileForm.department
+        department: profileForm.department,
+        profilePicture: profilePicture
       });
     }
     
@@ -210,13 +240,28 @@ const Settings = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  <img src="/lovable-uploads/24053dc8-dd48-4c5f-87d8-096d82f3c28f.png" alt="Profile" className="w-full h-full object-cover" />
+                <div 
+                  className="w-24 h-24 rounded-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={handleProfilePhotoClick}
+                >
+                  <Avatar className="w-full h-full">
+                    <AvatarImage src={profilePicture} className="w-full h-full object-cover" />
+                    <AvatarFallback>{user?.fullName?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleFileChange} 
+                  />
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">Profile Photo</h3>
                   <p className="text-sm text-gray-500 mb-2">PNG, JPG or GIF, maximum 1MB</p>
-                  <Button variant="outline" size="sm">Change Photo</Button>
+                  <Button variant="outline" size="sm" onClick={handleProfilePhotoClick}>
+                    Change Photo
+                  </Button>
                 </div>
               </div>
               
