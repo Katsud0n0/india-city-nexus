@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<boolean>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
+  updateUserProfile: (updatedUser: User) => void;
 }
 
 interface RegisterData {
@@ -89,6 +90,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   };
 
+  const updateUserProfile = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('current_user', JSON.stringify(updatedUser));
+    
+    toast({
+      title: "Profile Updated",
+      description: "Your profile has been successfully updated.",
+    });
+  };
+
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
@@ -101,7 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );
