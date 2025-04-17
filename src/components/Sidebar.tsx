@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, LayoutDashboard, Building2, FileText, MessageSquare, User, Users, Settings } from 'lucide-react';
+import { Home, LayoutDashboard, Building2, FileText, User, Users, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/departments', label: 'Departments', icon: <Building2 size={20} /> },
     { path: '/requests', label: 'Requests', icon: <FileText size={20} /> },
-    { path: '/messages', label: 'Messages', icon: <MessageSquare size={20} /> },
     { path: '/profile', label: 'Profile', icon: <User size={20} /> },
     { path: '/team', label: 'Team', icon: <Users size={20} /> },
     { path: '/settings', label: 'Settings', icon: <Settings size={20} /> },

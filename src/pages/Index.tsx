@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
-import { ArrowRight, CheckCircle, Users, Building, BarChart4, Clock, ChevronDown } from 'lucide-react';
+import { ArrowRight, CheckCircle, Users, Building, BarChart4, Clock } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -39,49 +39,6 @@ const Index = () => {
               Explore Departments
               <ArrowRight className="ml-2" />
             </Button>
-          </div>
-        </div>
-        
-        <div className="hidden md:flex md:w-1/3 p-8 items-center justify-center">
-          <div className="bg-slate-800 rounded-lg p-4 w-full max-w-md space-y-4 border border-slate-700">
-            <div className="flex space-x-2 pb-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            </div>
-            
-            <div className="request-card">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Water Supply Request</h3>
-                <span className="status-badge status-pending">Pending</span>
-              </div>
-              <p className="text-sm text-gray-300">Urgent water supply needed in Sector 5</p>
-              <div className="flex justify-end mt-2">
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-            
-            <div className="request-card">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Electricity Repair</h3>
-                <span className="status-badge status-completed">Completed</span>
-              </div>
-              <p className="text-sm text-gray-300">Street light maintenance in Ward 7</p>
-              <div className="flex justify-end mt-2">
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-            
-            <div className="request-card">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Health Camp Request</h3>
-                <span className="status-badge status-inprogress">In Progress</span>
-              </div>
-              <p className="text-sm text-gray-300">Vaccination drive at community center</p>
-              <div className="flex justify-end mt-2">
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
           </div>
         </div>
       </div>

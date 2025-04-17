@@ -113,6 +113,19 @@ export const createUser = (user: Omit<User, 'id' | 'createdAt'>): User => {
   return newUser;
 };
 
+export const updateUserProfile = (userId: string, updates: Partial<User>): User | undefined => {
+  const index = users.findIndex(user => user.id === userId);
+  if (index === -1) return undefined;
+  
+  users[index] = {
+    ...users[index],
+    ...updates
+  };
+  
+  saveToStorage();
+  return users[index];
+};
+
 // Request operations
 export const getRequests = (): Request[] => {
   return requests;
@@ -148,6 +161,18 @@ export const updateRequestStatus = (id: string, status: 'pending' | 'inprogress'
   requests[index].updatedAt = new Date().toISOString();
   saveToStorage();
   return requests[index];
+};
+
+export const deleteRequest = (id: string): boolean => {
+  const initialLength = requests.length;
+  requests = requests.filter(req => req.id !== id);
+  
+  if (requests.length !== initialLength) {
+    saveToStorage();
+    return true;
+  }
+  
+  return false;
 };
 
 // Export data to Excel file

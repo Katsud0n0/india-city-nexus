@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, FileText } from 'lucide-react';
+import { Plus, Search, Filter, FileText, Trash2, Eye, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -12,18 +12,33 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from '@/hooks/use-toast';
+import { 
   getRequests, 
   departments, 
-  Request as RequestType 
+  Request as RequestType,
+  updateRequestStatus,
+  deleteRequest 
 } from '@/services/excelService';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Requests = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [selectedRequest, setSelectedRequest] = useState<RequestType | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<string | null>(null);
   
   const allRequests = getRequests();
   
@@ -35,6 +50,51 @@ const Requests = () => {
     
     return matchesSearch && matchesStatus && matchesDepartment;
   });
+
+  const handleViewRequest = (request: RequestType) => {
+    setSelectedRequest(request);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedRequest(null);
+  };
+
+  const handleStatusChange = (status: 'pending' | 'inprogress' | 'completed') => {
+    if (selectedRequest) {
+      const updatedRequest = updateRequestStatus(selectedRequest.id, status);
+      if (updatedRequest) {
+        setSelectedRequest(updatedRequest);
+        toast({
+          title: "Status Updated",
+          description: `Request status changed to ${status}`,
+        });
+      }
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (requestToDelete) {
+      deleteRequest(requestToDelete);
+      setIsDeleteDialogOpen(false);
+      setRequestToDelete(null);
+      
+      // If we're deleting the currently selected request, close the details view
+      if (selectedRequest && selectedRequest.id === requestToDelete) {
+        setSelectedRequest(null);
+      }
+      
+      toast({
+        title: "Request Deleted",
+        description: "The request has been permanently deleted",
+      });
+    }
+  };
+
+  const openDeleteDialog = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click event
+    setRequestToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
   
   return (
     <div className="p-6">
@@ -102,8 +162,8 @@ const Requests = () => {
           {filteredRequests.map((request) => (
             <div 
               key={request.id} 
-              className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/requests/${request.id}`)}
+              className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-shadow relative"
+              onClick={() => handleViewRequest(request)}
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-semibold text-lg">{request.title}</h3>
@@ -115,6 +175,26 @@ const Requests = () => {
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Department: {request.department}</span>
                 <span>Created by: {request.createdBy}</span>
+              </div>
+              <div className="flex mt-4 justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center"
+                  onClick={(e) => { e.stopPropagation(); handleViewRequest(request); }}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="flex items-center"
+                  onClick={(e) => openDeleteDialog(request.id, e)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
               </div>
             </div>
           ))}
@@ -136,6 +216,116 @@ const Requests = () => {
           </Button>
         </div>
       )}
+
+      {/* Request Details Modal */}
+      {selectedRequest && (
+        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex justify-between items-center">
+                <span>{selectedRequest.title}</span>
+                <Button variant="ghost" size="sm" onClick={handleCloseDetails} className="h-8 w-8 p-0">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+              <DialogDescription>
+                <span className={`status-badge status-${selectedRequest.status} mt-2`}>
+                  {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1)}
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-1">Description</h4>
+                <p className="text-sm text-gray-700">{selectedRequest.description}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Department</h4>
+                  <p className="text-sm text-gray-700">{selectedRequest.department}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Created By</h4>
+                  <p className="text-sm text-gray-700">{selectedRequest.createdBy}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Created At</h4>
+                  <p className="text-sm text-gray-700">{new Date(selectedRequest.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Last Updated</h4>
+                  <p className="text-sm text-gray-700">{new Date(selectedRequest.updatedAt).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium mb-2">Update Status</h4>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={selectedRequest.status === 'pending' ? 'default' : 'outline'} 
+                    size="sm"
+                    className={selectedRequest.status === 'pending' ? 'bg-jd-lavender' : ''}
+                    onClick={() => handleStatusChange('pending')}
+                  >
+                    Pending
+                  </Button>
+                  <Button 
+                    variant={selectedRequest.status === 'inprogress' ? 'default' : 'outline'} 
+                    size="sm"
+                    className={selectedRequest.status === 'inprogress' ? 'bg-jd-lavender' : ''}
+                    onClick={() => handleStatusChange('inprogress')}
+                  >
+                    In Progress
+                  </Button>
+                  <Button 
+                    variant={selectedRequest.status === 'completed' ? 'default' : 'outline'} 
+                    size="sm"
+                    className={selectedRequest.status === 'completed' ? 'bg-jd-lavender' : ''}
+                    onClick={() => handleStatusChange('completed')}
+                  >
+                    Completed
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  setRequestToDelete(selectedRequest.id);
+                  setIsDeleteDialogOpen(true);
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this request? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

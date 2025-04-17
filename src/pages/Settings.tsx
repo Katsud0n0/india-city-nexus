@@ -10,15 +10,18 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Settings = () => {
   const { toast } = useToast();
+  const { user, updateUserProfile } = useAuth();
+  
   const [profileForm, setProfileForm] = useState({
-    name: 'Rajesh Kumar',
+    name: user?.fullName || 'Rajesh Kumar',
     email: 'rajesh.kumar@jdmodern.gov.in',
     phone: '+91 98765 43210',
     jobTitle: 'Team Lead',
-    department: 'Water Department',
+    department: user?.department || 'Water Department',
     location: 'HQ, Sector 5'
   });
 
@@ -37,6 +40,14 @@ const Settings = () => {
     fontSize: 'medium',
     colorScheme: 'default'
   });
+  
+  const [securityForm, setSecurityForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfileForm({
@@ -45,7 +56,23 @@ const Settings = () => {
     });
   };
 
+  const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSecurityForm({
+      ...securityForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const handleSaveProfile = () => {
+    // In a real app, this would update the user's profile in the backend
+    if (user) {
+      updateUserProfile({
+        ...user,
+        fullName: profileForm.name,
+        department: profileForm.department
+      });
+    }
+    
     toast({
       title: "Profile updated",
       description: "Your profile changes have been saved successfully.",
@@ -60,9 +87,84 @@ const Settings = () => {
   };
 
   const handleSaveDisplay = () => {
+    // Apply theme changes
+    document.documentElement.classList.toggle('dark', displaySettings.theme === 'dark');
+    
+    // Apply font size changes
+    const fontSizeClasses = {
+      small: 'text-sm',
+      medium: 'text-base',
+      large: 'text-lg'
+    };
+    
+    document.documentElement.className = document.documentElement.className
+      .replace(/text-sm|text-base|text-lg/, '')
+      .concat(` ${fontSizeClasses[displaySettings.fontSize as keyof typeof fontSizeClasses]}`);
+    
     toast({
       title: "Display settings updated",
       description: "Your display preferences have been saved.",
+    });
+  };
+  
+  const handleUpdatePassword = () => {
+    // Validate password fields
+    if (!securityForm.currentPassword) {
+      toast({
+        title: "Current password required",
+        description: "Please enter your current password.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (securityForm.newPassword.length < 8) {
+      toast({
+        title: "Invalid password",
+        description: "New password must be at least 8 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (securityForm.newPassword !== securityForm.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation do not match.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // In a real app, this would update the user's password in the backend
+    toast({
+      title: "Password updated",
+      description: "Your password has been changed successfully.",
+    });
+    
+    // Reset form
+    setSecurityForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+  };
+  
+  const handleToggleTwoFactor = () => {
+    setTwoFactorEnabled(!twoFactorEnabled);
+    
+    toast({
+      title: twoFactorEnabled ? "Two-factor authentication disabled" : "Two-factor authentication enabled",
+      description: twoFactorEnabled 
+        ? "Your account is now less secure. We recommend enabling two-factor authentication." 
+        : "Your account is now more secure with two-factor authentication.",
+    });
+  };
+  
+  const handleLogoutAllSessions = () => {
+    toast({
+      title: "All sessions terminated",
+      description: "You have been logged out from all devices except this one.",
     });
   };
 
@@ -109,7 +211,7 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
                 <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  <img src="/placeholder.svg" alt="Profile" className="w-full h-full object-cover" />
+                  <img src="/lovable-uploads/24053dc8-dd48-4c5f-87d8-096d82f3c28f.png" alt="Profile" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">Profile Photo</h3>
@@ -164,7 +266,10 @@ const Settings = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="department">Department</Label>
-                  <Select defaultValue={profileForm.department}>
+                  <Select 
+                    defaultValue={profileForm.department}
+                    onValueChange={(value) => setProfileForm(prev => ({ ...prev, department: value }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
@@ -437,22 +542,43 @@ const Settings = () => {
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input id="current-password" type="password" />
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input 
+                      id="currentPassword" 
+                      name="currentPassword"
+                      type="password" 
+                      value={securityForm.currentPassword}
+                      onChange={handleSecurityChange}
+                    />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input id="new-password" type="password" />
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input 
+                      id="newPassword" 
+                      name="newPassword"
+                      type="password" 
+                      value={securityForm.newPassword}
+                      onChange={handleSecurityChange}
+                    />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input id="confirm-password" type="password" />
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input 
+                      id="confirmPassword" 
+                      name="confirmPassword"
+                      type="password" 
+                      value={securityForm.confirmPassword}
+                      onChange={handleSecurityChange}
+                    />
                   </div>
                 </div>
                 
-                <Button className="bg-jd-lavender hover:bg-jd-purple">
+                <Button 
+                  className="bg-jd-lavender hover:bg-jd-purple"
+                  onClick={handleUpdatePassword}
+                >
                   Update Password
                 </Button>
               </div>
@@ -465,15 +591,21 @@ const Settings = () => {
                     <h4 className="font-medium">Two-Factor Authentication</h4>
                     <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={twoFactorEnabled}
+                    onCheckedChange={handleToggleTwoFactor}
+                  />
                 </div>
                 
                 <p className="text-sm text-gray-500">
                   Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.
                 </p>
                 
-                <Button variant="outline">
-                  Setup Two-Factor Authentication
+                <Button 
+                  variant="outline"
+                  onClick={handleToggleTwoFactor}
+                >
+                  {twoFactorEnabled ? 'Disable' : 'Setup'} Two-Factor Authentication
                 </Button>
               </div>
               
@@ -507,7 +639,10 @@ const Settings = () => {
                   </div>
                 </div>
                 
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={handleLogoutAllSessions}
+                >
                   Logout of All Sessions
                 </Button>
               </div>

@@ -17,7 +17,6 @@ import Departments from "./pages/Departments";
 import Requests from "./pages/Requests";
 import NewRequest from "./pages/NewRequest";
 import Profile from "./pages/Profile";
-import Messages from "./pages/Messages";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -43,7 +42,6 @@ const App = () => (
               <Route path="/requests" element={<Requests />} />
               <Route path="/requests/new" element={<NewRequest />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/messages" element={<Messages />} />
               <Route path="/team" element={<Team />} />
               <Route path="/settings" element={<Settings />} />
             </Route>

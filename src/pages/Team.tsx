@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Filter, UserPlus, Mail, Phone, Building, MapPin } from 'lucide-react';
+import { Plus, Filter, UserPlus, Mail, Phone, Building, MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
+// Updated team members with profile images
 const mockTeamMembers = [
   {
     id: 1,
@@ -22,7 +33,7 @@ const mockTeamMembers = [
     email: 'rajesh.kumar@jdmodern.gov.in',
     phone: '+91 98765 43210',
     location: 'HQ, Sector 5',
-    avatar: '/placeholder.svg'
+    avatar: '/lovable-uploads/24053dc8-dd48-4c5f-87d8-096d82f3c28f.png'
   },
   {
     id: 2,
@@ -32,7 +43,7 @@ const mockTeamMembers = [
     email: 'priya.sharma@jdmodern.gov.in',
     phone: '+91 87654 32109',
     location: 'East Zone Office',
-    avatar: '/placeholder.svg'
+    avatar: 'https://randomuser.me/api/portraits/women/12.jpg'
   },
   {
     id: 3,
@@ -42,7 +53,7 @@ const mockTeamMembers = [
     email: 'amit.patel@jdmodern.gov.in',
     phone: '+91 76543 21098',
     location: 'Medical Complex, Ward 7',
-    avatar: '/placeholder.svg'
+    avatar: 'https://randomuser.me/api/portraits/men/22.jpg'
   },
   {
     id: 4,
@@ -52,7 +63,7 @@ const mockTeamMembers = [
     email: 'sunita.verma@jdmodern.gov.in',
     phone: '+91 65432 10987',
     location: 'West Zone Office',
-    avatar: '/placeholder.svg'
+    avatar: 'https://randomuser.me/api/portraits/women/32.jpg'
   },
   {
     id: 5,
@@ -62,7 +73,7 @@ const mockTeamMembers = [
     email: 'vikram.singh@jdmodern.gov.in',
     phone: '+91 54321 09876',
     location: 'Central Office',
-    avatar: '/placeholder.svg'
+    avatar: 'https://randomuser.me/api/portraits/men/42.jpg'
   },
   {
     id: 6,
@@ -72,17 +83,28 @@ const mockTeamMembers = [
     email: 'meera.joshi@jdmodern.gov.in',
     phone: '+91 43210 98765',
     location: 'Green Zone, Sector 8',
-    avatar: '/placeholder.svg'
+    avatar: 'https://randomuser.me/api/portraits/women/52.jpg'
   },
 ];
 
 const departments = ['All Departments', 'Water Department', 'Electricity Department', 'Health Department', 'Waste Management', 'Police Department', 'Parks & Recreation'];
 
 const Team = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
+  const [teamMembers, setTeamMembers] = useState(mockTeamMembers);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [newTeamMember, setNewTeamMember] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    department: '',
+    location: ''
+  });
   
-  const filteredTeamMembers = mockTeamMembers.filter(member => {
+  const filteredTeamMembers = teamMembers.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          member.role.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDepartment = selectedDepartment === 'All Departments' || member.department === selectedDepartment;
@@ -90,12 +112,75 @@ const Team = () => {
     return matchesSearch && matchesDepartment;
   });
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewTeamMember(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setNewTeamMember(prev => ({ ...prev, department: value }));
+  };
+
+  const handleInvite = () => {
+    // Validate all fields are filled
+    const requiredFields = ['name', 'email', 'phone', 'role', 'department', 'location'];
+    const missingFields = requiredFields.filter(field => !newTeamMember[field as keyof typeof newTeamMember]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Missing Information",
+        description: `Please fill in all required fields: ${missingFields.join(', ')}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newTeamMember.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Add the new team member
+    const newMember = {
+      id: teamMembers.length + 1,
+      ...newTeamMember,
+      avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'women' : 'men'}/${Math.floor(Math.random() * 99)}.jpg`
+    };
+    
+    setTeamMembers(prev => [...prev, newMember]);
+    setIsInviteDialogOpen(false);
+    
+    // Reset form
+    setNewTeamMember({
+      name: '',
+      email: '',
+      phone: '',
+      role: '',
+      department: '',
+      location: ''
+    });
+    
+    toast({
+      title: "Team Member Invited",
+      description: `${newMember.name} has been invited to join the team.`
+    });
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Team Management</h1>
         <div className="flex space-x-2">
-          <Button className="bg-jd-lavender hover:bg-jd-purple">
+          <Button 
+            className="bg-jd-lavender hover:bg-jd-purple"
+            onClick={() => setIsInviteDialogOpen(true)}
+          >
             <UserPlus size={18} className="mr-2" />
             Invite Team Member
           </Button>
@@ -157,7 +242,7 @@ const Team = () => {
             </TabsList>
             
             <div className="text-sm text-gray-500">
-              Showing {filteredTeamMembers.length} of {mockTeamMembers.length} team members
+              Showing {filteredTeamMembers.length} of {teamMembers.length} team members
             </div>
           </div>
           
@@ -255,6 +340,118 @@ const Team = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Invite Team Member Dialog */}
+      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>Invite Team Member</span>
+              <Button variant="ghost" size="sm" onClick={() => setIsInviteDialogOpen(false)} className="h-8 w-8 p-0">
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details to invite a new team member to the platform.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="John Doe"
+                  value={newTeamMember.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="john.doe@example.com"
+                  value={newTeamMember.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  placeholder="+91 99999 88888"
+                  value={newTeamMember.phone}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="role">Role/Position</Label>
+                <Input
+                  id="role"
+                  name="role"
+                  placeholder="Engineer"
+                  value={newTeamMember.role}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="department">Department</Label>
+                <Select
+                  value={newTeamMember.department}
+                  onValueChange={handleDepartmentChange}
+                >
+                  <SelectTrigger id="department">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.slice(1).map((dept) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="location">Office Location</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  placeholder="HQ, Sector 5"
+                  value={newTeamMember.location}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsInviteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="bg-jd-lavender hover:bg-jd-purple"
+              onClick={handleInvite}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
